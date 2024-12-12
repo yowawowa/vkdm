@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import random
 import time
+
+import requests
+import os
+from dotenv import load_dotenv
 from simple_bot import Bot  # базовый класс бота из файла simple_bot
 
 from vk_api.longpoll import (
@@ -8,7 +12,7 @@ from vk_api.longpoll import (
     VkEventType,
 )  # использование VkLongPoll и VkEventType
 
-
+load_dotenv()
 modern_wisdom = [
     "Все проблемы человечества проистекают из неспособности человека тихо посидеть в комнате наедине с собой. Блез Паскаль",
     "Нехватка уединения Состояние, при котором вы не свободны от влияния чужих идей и практически не тратите время на собственные мысли.",
@@ -53,32 +57,45 @@ class LongPollBot(Bot):
         """
         Запуск бота
         """
-        for event in self.long_poll.listen():
 
-            # если пришло новое сообщение - происходит проверка текста сообщения
-            if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-                user_id = event.user_id
-                current_time = time.time()
-                cooldown_period = 60 * 5  # 5 minutes cooldown period
+        while True:
+            try:
+                for event in self.long_poll.listen():
 
-                if user_id in self.user_last_response_time:
-                    last_response_time = self.user_last_response_time[user_id]
-                    if current_time - last_response_time < cooldown_period:
-                        self.send_message(
-                            receiver_user_id=user_id,
-                            message_text="ну правда. я смогу ответить только новой цитатой. и то через пять минут",
-                        )
-                        continue
-                self.user_last_response_time[user_id] = current_time
+                    # если пришло новое сообщение - происходит проверка текста сообщения
+                    if (
+                        event.type == VkEventType.MESSAGE_NEW
+                        and event.to_me
+                        and event.text
+                    ):
+                        user_id = event.user_id
+                        current_time = time.time()
+                        cooldown_period = 60 * 5  # 5 minutes cooldown period
 
-                # ответ отправляется в личные сообщения пользователя (если сообщение из личного чата)
-                if event.from_user:
+                        if user_id in self.user_last_response_time:
+                            last_response_time = self.user_last_response_time[user_id]
+                            if current_time - last_response_time < cooldown_period:
+                                self.send_message(
+                                    receiver_user_id=user_id,
+                                    message_text="ну правда. я смогу ответить только новой цитатой. и то через пять минут",
+                                )
+                                continue
+                        self.user_last_response_time[user_id] = current_time
 
-                    self.send_message(
-                        receiver_user_id=event.user_id,
-                        message_text=f"привет. теперь я крайне редко бываю ВК\nесли хочешь со мной связаться, напиши в телеграм: https://t.me/yowawowa\n---\n{random_quote()}",
-                    )
+                        # ответ отправляется в личные сообщения пользователя (если сообщение из личного чата)
+                        if event.from_user:
 
-                # ответ отпрвляется в беседу (если сообщение было получено в общем чате)
-                # elif event.from_chat:
-                #    self.send_message(receiver_user_id=event.chat_id, message_text="Всем привет")
+                            self.send_message(
+                                receiver_user_id=event.user_id,
+                                message_text=f"привет. теперь я крайне редко бываю ВК\nесли хочешь со мной связаться, напиши в телеграм: https://t.me/yowawowa\n---\n{random_quote()}",
+                            )
+
+                        # ответ отпрвляется в беседу (если сообщение было получено в общем чате)
+                        # elif event.from_chat:
+                        #    self.send_message(receiver_user_id=event.chat_id, message_text="Всем привет")
+
+            except Exception as error:
+                requests.post(
+                    f"https://ntfy.sh/{os.getenv("NTFY_TOPIC")}",
+                    data="vkdm crashed".encode(encoding="utf-8"),
+                )
