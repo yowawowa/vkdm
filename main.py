@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from longpoll_bot import LongPollBot
 
 if __name__ == "__main__":

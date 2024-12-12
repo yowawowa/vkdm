@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import random
 from simple_bot import Bot  # базовый класс бота из файла simple_bot
 
