@@ -3,7 +3,9 @@
 # Получить токен: https://vkhost.github.io/
 
 import vk_api  # использование VK API
-from vk_api.utils import get_random_id  # снижение количества повторных отправок сообщения
+from vk_api.utils import (
+    get_random_id,
+)  # снижение количества повторных отправок сообщения
 from dotenv import load_dotenv  # загрузка информации из .env-файла
 import os  # работа с файловой системой
 
@@ -56,7 +58,9 @@ class Bot:
             print(error)
             return None
 
-    def send_message(self, receiver_user_id: str = None, message_text: str = "тестовое сообщение"):
+    def send_message(
+        self, receiver_user_id: str = None, message_text: str = "тестовое сообщение"
+    ):
         """
         Отправка сообщения от лица авторизованного пользователя
         :param receiver_user_id: уникальный идентификатор получателя сообщения
@@ -71,7 +75,13 @@ class Bot:
             receiver_user_id = self.default_user_id
 
         try:
-            self.vk_api_access.messages.send(user_id=receiver_user_id, message=message_text, random_id=get_random_id())
-            print(f"Сообщение отправлено для ID {receiver_user_id} с текстом: {message_text}")
+            self.vk_api_access.messages.send(
+                user_id=receiver_user_id,
+                message=message_text,
+                random_id=get_random_id(),
+            )
+            print(
+                f"Сообщение отправлено для ID {receiver_user_id} с текстом: {message_text}"
+            )
         except Exception as error:
             print(error)

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
+import time
 from simple_bot import Bot  # базовый класс бота из файла simple_bot
 
 from vk_api.longpoll import (
@@ -39,6 +40,8 @@ class LongPollBot(Bot):
     # длительное подключение
     long_poll = None
 
+    user_last_response_time = {}
+
     def __init__(self):
         """
         Иинициализация бота
@@ -54,9 +57,23 @@ class LongPollBot(Bot):
 
             # если пришло новое сообщение - происходит проверка текста сообщения
             if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
+                user_id = event.user_id
+                current_time = time.time()
+                cooldown_period = 60 * 5  # 5 minutes cooldown period
+
+                if user_id in self.user_last_response_time:
+                    last_response_time = self.user_last_response_time[user_id]
+                    if current_time - last_response_time < cooldown_period:
+                        self.send_message(
+                            receiver_user_id=user_id,
+                            message_text="ну правда. я смогу ответить только новой цитатой. и то через пять минут",
+                        )
+                        continue
+                self.user_last_response_time[user_id] = current_time
 
                 # ответ отправляется в личные сообщения пользователя (если сообщение из личного чата)
                 if event.from_user:
+
                     self.send_message(
                         receiver_user_id=event.user_id,
                         message_text=f"привет. теперь я крайне редко бываю ВК\nесли хочешь со мной связаться, напиши в телеграм: https://t.me/yowawowa\n---\n{random_quote()}",
