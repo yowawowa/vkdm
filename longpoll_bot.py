@@ -29,11 +29,6 @@ def random_quote():
     return f"{modern_wisdom[random.randint(0, len(modern_wisdom) - 1)]}"
 
 
-print(
-    f"привет. теперь я крайне редко бываю ВК    \nесли хочешь со мной связаться, напиши в телеграм: https://t.me/yowawowa\n---\n{random_quote()}"
-)
-
-
 class LongPollBot(Bot):
     """
     Бот, прослушивающий в бесконечном цикле входящие сообщения и способный отвечать на некоторые из них
@@ -63,7 +58,7 @@ class LongPollBot(Bot):
                 if event.from_user:
                     self.send_message(
                         receiver_user_id=event.user_id,
-                        message_text=f"привет. теперь я крайне редко бываю ВК    \nесли хочешь со мной связаться, напиши в телеграм: https://t.me/yowawowa\n---\n{random_quote()}",
+                        message_text=f"привет. теперь я крайне редко бываю ВК\nесли хочешь со мной связаться, напиши в телеграм: https://t.me/yowawowa\n---\n{random_quote()}",
                     )
 
                 # ответ отпрвляется в беседу (если сообщение было получено в общем чате)
